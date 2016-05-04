@@ -1,0 +1,12 @@
+{
+	"repos":[
+		{
+			"name":"angular-local-storage",
+			"url": "jhenaoz/angular-local-storage"
+		},
+	 	{
+	 		"name":"Java-Angular-I18n",
+	 		"url":"jhenaoz/Java-Angular-I18n"
+	 	}
+	]
+}
