@@ -1,47 +1,66 @@
 package co.com.psl.service;
 
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
+import co.com.psl.model.GithubRepository;
 import co.com.psl.request.GithubWrapper;
 
 @Component
 public class ReportGenerator {
 
+	
+	public static final String CSV_SEPARATOR = ",";
 	@Autowired
-	ResourceLoader resourceLoader;
+	private CvsParser cvsParser;
 
 	@Autowired
-	GithubWrapper github;
+	private GithubWrapper github;
+	
+	private ArrayList<GithubRepository> reposInformation = new ArrayList<GithubRepository>();
 
 	@PostConstruct
-	public void generateReposStatisticsReport() {
-		System.out.println("generating report....");
-		String json = loadReposJsonFile();
-		JsonParser jsonParser = new JsonParser();
-		JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
-		JsonArray jsonArray = jsonObject.get("repos").getAsJsonArray();
-		for (JsonElement jsonElement : jsonArray) {
-			System.out.println(getLinesNumberByRepo(jsonElement.getAsJsonObject().get("url").getAsString()));
+	public void generateReposStatisticsReport() throws IOException {
+		System.out.println("Generating Report....");
+		String[] repos = cvsParser.loadCsvFile();
+		for (String repo : repos) {
+			String repoName = getRepoNameFromCvsLine(repo);
+			int lines = getLinesNumberByRepo(repoName);
+			reposInformation.add(new GithubRepository(repoName, lines));
 		}
+		exportReportAsCsv("Repositories Report");
 		System.exit(0);
 	}
+	
+	private void exportReportAsCsv(String fileName) throws IOException {
+		FileWriter writer = new FileWriter(fileName + ".csv");
+		
+		for (GithubRepository githubRepository : reposInformation) {
+			writer.append(githubRepository.getName());
+			writer.append(CSV_SEPARATOR);
+			writer.append(String.valueOf(githubRepository.getCodeLines()));
+			writer.append("\n");
+			
+		}
+		writer.flush();
+		writer.close();
+	}
 
-	public int getLinesNumberByRepo(String repo) {
+	public String getRepoNameFromCvsLine(String cvsLine){
+		String[] cvsElements = cvsLine.split(","); 
+		return cvsElements[0];
+	}
+
+	public int getLinesNumberByRepo(String repo) throws IOException {
 		int codeLines = 0;
 		JsonArray contributors = github.GetContributorsByRepo(repo);
 		for (JsonElement contributor : contributors) {
@@ -54,16 +73,4 @@ public class ReportGenerator {
 		return codeLines;
 	}
 
-	public String loadReposJsonFile() {
-		Resource resource = resourceLoader.getResource("classpath:repos.json");
-		try {
-			InputStream inputStream = resource.getInputStream();
-			StringWriter writer = new StringWriter();
-			IOUtils.copy(inputStream, writer);
-			return writer.toString();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return "";
-	}
 }
