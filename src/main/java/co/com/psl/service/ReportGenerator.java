@@ -35,12 +35,18 @@ public class ReportGenerator {
 		for (String repo : repos) {
 			String repoName = getRepoNameFromCvsLine(repo);
 			int lines = getLinesNumberByRepo(repoName);
-			reposInformation.add(new GithubRepository(repoName, lines));
+			int files = getFilesByRepository(repoName);
+			reposInformation.add(new GithubRepository(repoName, lines, files));
 		}
 		exportReportAsCsv("Repositories Report");
 		System.exit(0);
 	}
 	
+	private int getFilesByRepository(String repoName) throws IOException {
+		JsonArray files = github.getNumberOfFilesByRepository(repoName);
+		return files.size();
+	}
+
 	private void exportReportAsCsv(String fileName) throws IOException {
 		FileWriter writer = new FileWriter(fileName + ".csv");
 		
@@ -48,6 +54,8 @@ public class ReportGenerator {
 			writer.append(githubRepository.getName());
 			writer.append(CSV_SEPARATOR);
 			writer.append(String.valueOf(githubRepository.getCodeLines()));
+			writer.append(CSV_SEPARATOR);
+			writer.append(String.valueOf(githubRepository.getFiles()));
 			writer.append("\n");
 			
 		}
@@ -62,7 +70,7 @@ public class ReportGenerator {
 
 	public int getLinesNumberByRepo(String repo) throws IOException {
 		int codeLines = 0;
-		JsonArray contributors = github.GetContributorsByRepo(repo);
+		JsonArray contributors = github.getContributorsByRepo(repo);
 		for (JsonElement contributor : contributors) {
 			JsonArray contributedWeeks = contributor.getAsJsonObject().get("weeks").getAsJsonArray();
 			for (JsonElement week : contributedWeeks) {

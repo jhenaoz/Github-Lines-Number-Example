@@ -28,14 +28,26 @@ public class GithubWrapper implements EnvironmentAware {
 
 	public static final String GITHUB_API = "https://api.github.com/repos/";
 
-	public JsonArray GetContributorsByRepo(String repo) throws IOException {
+	public JsonArray getContributorsByRepo(String repository) throws IOException {
 		StringBuilder getContributorsUrl = new StringBuilder();
 		getContributorsUrl.append(GITHUB_API);
+		getContributorsUrl.append(repository);
 		getContributorsUrl.append("/stats/contributors?access_token=");
 		getContributorsUrl.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
 		JsonParser parser = new JsonParser();
 		String httpResponse = makeHttpRequest(getContributorsUrl.toString(), HttpMethod.GET);
 		return parser.parse(httpResponse).getAsJsonArray();
+	}
+	
+	public JsonArray getNumberOfFilesByRepository(String repository) throws IOException{
+		StringBuilder getTreeFilesUrl = new StringBuilder();
+		getTreeFilesUrl.append(GITHUB_API);
+		getTreeFilesUrl.append(repository);
+		getTreeFilesUrl.append("/git/trees/master?recursive=1&access_token=");
+		getTreeFilesUrl.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
+		JsonParser parser = new JsonParser();
+		String httpResponse = makeHttpRequest(getTreeFilesUrl.toString(), HttpMethod.GET);
+		return parser.parse(httpResponse).getAsJsonObject().get("tree").getAsJsonArray();
 	}
 	
 	public String makeHttpRequest(String url, HttpMethod method) throws IOException{
