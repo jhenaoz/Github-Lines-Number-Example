@@ -21,10 +21,10 @@ public class ReportGenerator {
 	
 	public static final String CSV_SEPARATOR = ",";
 	@Autowired
-	CvsParser cvsParser;
+	private CvsParser cvsParser;
 
 	@Autowired
-	GithubWrapper github;
+	private GithubWrapper github;
 	
 	private ArrayList<GithubRepository> reposInformation = new ArrayList<GithubRepository>();
 
@@ -37,17 +37,17 @@ public class ReportGenerator {
 			int lines = getLinesNumberByRepo(repoName);
 			reposInformation.add(new GithubRepository(repoName, lines));
 		}
-		exportReportAsCsv();
+		exportReportAsCsv("Repositories Report");
 		System.exit(0);
 	}
 	
-	private void exportReportAsCsv() throws IOException {
-		FileWriter writer = new FileWriter("test.csv");
+	private void exportReportAsCsv(String fileName) throws IOException {
+		FileWriter writer = new FileWriter(fileName + ".csv");
 		
 		for (GithubRepository githubRepository : reposInformation) {
 			writer.append(githubRepository.getName());
 			writer.append(CSV_SEPARATOR);
-			writer.append("" + githubRepository.getCodeLines());
+			writer.append(String.valueOf(githubRepository.getCodeLines()));
 			writer.append("\n");
 			
 		}

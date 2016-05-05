@@ -16,8 +16,10 @@ public class CvsParser {
 	@Autowired
 	private ResourceLoader resourceLoader;
 	
+	public static final String CSV_FILE = "classpath:repos.csv";
+	
 	public String[] loadCsvFile() throws IOException {
-		Resource resource = resourceLoader.getResource("classpath:repos.csv");
+		Resource resource = resourceLoader.getResource(CSV_FILE);
 		InputStream inputStream = resource.getInputStream();
 		StringWriter writer = new StringWriter();
 		IOUtils.copy(inputStream, writer);

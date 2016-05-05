@@ -7,8 +7,8 @@ public class GithubRepository {
 	
 	public GithubRepository(){};
 	
-	public GithubRepository(String repoName, int lines) {
-		this.name = repoName;
+	public GithubRepository(String name, int lines) {
+		this.name = name;
 		this.codeLines = lines;
 	}
 	public String getName() {
