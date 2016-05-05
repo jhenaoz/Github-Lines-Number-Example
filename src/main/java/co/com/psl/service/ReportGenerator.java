@@ -30,7 +30,6 @@ public class ReportGenerator {
 
 	@PostConstruct
 	public void generateReposStatisticsReport() throws IOException {
-		System.out.println("Generating Report....");
 		String[] repos = cvsParser.loadCsvFile();
 		for (String repo : repos) {
 			String repoName = getRepoNameFromCvsLine(repo);
@@ -42,14 +41,13 @@ public class ReportGenerator {
 		System.exit(0);
 	}
 	
-	private int getFilesByRepository(String repoName) throws IOException {
-		JsonArray files = github.getNumberOfFilesByRepository(repoName);
+	private int getFilesByRepository(String repositoryName) throws IOException {
+		JsonArray files = github.getNumberOfFilesByRepository(repositoryName);
 		return files.size();
 	}
 
 	private void exportReportAsCsv(String fileName) throws IOException {
 		FileWriter writer = new FileWriter(fileName + ".csv");
-		
 		for (GithubRepository githubRepository : reposInformation) {
 			writer.append(githubRepository.getName());
 			writer.append(CSV_SEPARATOR);

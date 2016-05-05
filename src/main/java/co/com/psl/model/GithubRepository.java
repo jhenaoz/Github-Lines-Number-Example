@@ -8,20 +8,24 @@ public class GithubRepository {
 	
 	public GithubRepository(){};
 	
-	public GithubRepository(String name, int lines, int files) {
+	public GithubRepository(String name, int quantityOfLines, int quantityOfFiles) {
 		this.name = name;
-		this.codeLines = lines;
-		this.files = files;
+		this.codeLines = quantityOfLines;
+		this.files = quantityOfFiles;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public int getCodeLines() {
 		return codeLines;
 	}
+	
 	public void setCodeLines(int codeLines) {
 		this.codeLines = codeLines;
 	}
