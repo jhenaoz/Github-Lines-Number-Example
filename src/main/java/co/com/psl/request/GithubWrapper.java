@@ -20,6 +20,7 @@ import com.google.gson.JsonParser;
 public class GithubWrapper implements EnvironmentAware {
 
 	private RelaxedPropertyResolver propertyResolver;
+	private JsonParser parser = new JsonParser();
 
 	@Override
 	public void setEnvironment(Environment environment) {
@@ -27,27 +28,37 @@ public class GithubWrapper implements EnvironmentAware {
 	}
 
 	public static final String GITHUB_API = "https://api.github.com/repos/";
+	public static final String GITHUB_API_CONTRIBUTORS = "/stats/contributors?access_token=" ;
+	public static final String GITHUB_API_TREES_RECURSIVE = "/git/trees/master?recursive=1&access_token=";
+	public static final String GITHUB_API_ADDITIONS_PER_WEEK = "/stats/code_frequency";
 
 	public JsonArray getContributorsByRepo(String repository) throws IOException {
-		StringBuilder getContributorsUrl = new StringBuilder();
-		getContributorsUrl.append(GITHUB_API);
-		getContributorsUrl.append(repository);
-		getContributorsUrl.append("/stats/contributors?access_token=");
-		getContributorsUrl.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
-		JsonParser parser = new JsonParser();
+		StringBuilder getContributorsUrl = new StringBuilder()
+			.append(GITHUB_API)
+			.append(repository)
+			.append(GITHUB_API_CONTRIBUTORS)
+			.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
 		String httpResponse = makeHttpRequest(getContributorsUrl.toString(), HttpMethod.GET);
 		return parser.parse(httpResponse).getAsJsonArray();
 	}
 	
 	public JsonArray getNumberOfFilesByRepository(String repository) throws IOException{
-		StringBuilder getTreeFilesUrl = new StringBuilder();
-		getTreeFilesUrl.append(GITHUB_API);
-		getTreeFilesUrl.append(repository);
-		getTreeFilesUrl.append("/git/trees/master?recursive=1&access_token=");
-		getTreeFilesUrl.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
-		JsonParser parser = new JsonParser();
+		StringBuilder getTreeFilesUrl = new StringBuilder()
+			.append(GITHUB_API)
+			.append(repository)
+			.append(GITHUB_API_TREES_RECURSIVE)
+			.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
 		String httpResponse = makeHttpRequest(getTreeFilesUrl.toString(), HttpMethod.GET);
 		return parser.parse(httpResponse).getAsJsonObject().get("tree").getAsJsonArray();
+	}
+	
+	public JsonArray getNumberOfLinesModificationsFromDate(String repository, String date, String branch) throws IOException{
+		StringBuilder commitsUrl = new StringBuilder()
+			.append(GITHUB_API)
+			.append(repository)
+			.append(GITHUB_API_ADDITIONS_PER_WEEK);
+		String httpResponse = makeHttpRequest(commitsUrl.toString(), HttpMethod.GET);
+		return parser.parse(httpResponse).getAsJsonArray();	
 	}
 	
 	public String makeHttpRequest(String url, HttpMethod method) throws IOException{

@@ -3,15 +3,17 @@ package co.com.psl.model;
 public class GithubRepository {
 
 	private String name;
-	private int codeLines;
-	private int files;
+	private int numberOfLines;
+	private int numberOfFiles;
+	private int numberOfModifications;
 	
 	public GithubRepository(){};
 	
-	public GithubRepository(String name, int quantityOfLines, int quantityOfFiles) {
+	public GithubRepository(String name, int numberOfLines, int numberOfFiles, int numberOfModifications) {
 		this.name = name;
-		this.codeLines = quantityOfLines;
-		this.files = quantityOfFiles;
+		this.numberOfLines = numberOfLines;
+		this.numberOfFiles = numberOfFiles;
+		this.numberOfModifications = numberOfModifications;
 	}
 	
 	public String getName() {
@@ -21,20 +23,30 @@ public class GithubRepository {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public int getCodeLines() {
-		return codeLines;
-	}
-	
-	public void setCodeLines(int codeLines) {
-		this.codeLines = codeLines;
+
+	public int getNumberOfLines() {
+		return numberOfLines;
 	}
 
-	public int getFiles() {
-		return files;
+	public void setNumberOfLines(int numberOfLines) {
+		this.numberOfLines = numberOfLines;
 	}
 
-	public void setFiles(int files) {
-		this.files = files;
+	public int getNumberOfFiles() {
+		return numberOfFiles;
 	}
+
+	public void setNumberOfFiles(int numberOfFiles) {
+		this.numberOfFiles = numberOfFiles;
+	}
+
+	public int getNumberOfModifications() {
+		return numberOfModifications;
+	}
+
+	public void setNumberOfModifications(int numberOfModifications) {
+		this.numberOfModifications = numberOfModifications;
+	}
+	
+
 }

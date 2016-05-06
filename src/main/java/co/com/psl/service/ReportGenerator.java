@@ -2,7 +2,10 @@ package co.com.psl.service;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
 
@@ -20,6 +23,7 @@ public class ReportGenerator {
 
 	
 	public static final String CSV_SEPARATOR = ",";
+	public static final int MONTHS_TO_SEARCH = 12;
 	@Autowired
 	private CvsParser cvsParser;
 
@@ -33,9 +37,10 @@ public class ReportGenerator {
 		String[] repos = cvsParser.loadCsvFile();
 		for (String repo : repos) {
 			String repoName = getRepoNameFromCvsLine(repo);
-			int lines = getLinesNumberByRepo(repoName);
-			int files = getFilesByRepository(repoName);
-			reposInformation.add(new GithubRepository(repoName, lines, files));
+			int numberOfLines = getLinesNumberByRepo(repoName);
+			int numberOfFiles = getFilesByRepository(repoName);
+			int numberOfModifiedLines = getModifiedLinesInTheLastMonths(repoName, MONTHS_TO_SEARCH);
+			reposInformation.add(new GithubRepository(repoName, numberOfLines, numberOfFiles, numberOfModifiedLines ));
 		}
 		exportReportAsCsv("Repositories Report");
 		System.exit(0);
@@ -51,9 +56,11 @@ public class ReportGenerator {
 		for (GithubRepository githubRepository : reposInformation) {
 			writer.append(githubRepository.getName());
 			writer.append(CSV_SEPARATOR);
-			writer.append(String.valueOf(githubRepository.getCodeLines()));
+			writer.append(String.valueOf(githubRepository.getNumberOfLines()));
 			writer.append(CSV_SEPARATOR);
-			writer.append(String.valueOf(githubRepository.getFiles()));
+			writer.append(String.valueOf(githubRepository.getNumberOfFiles()));
+			writer.append(CSV_SEPARATOR);
+			writer.append(String.valueOf(githubRepository.getNumberOfModifications()));
 			writer.append("\n");
 			
 		}
@@ -77,6 +84,35 @@ public class ReportGenerator {
 			}
 		}
 		return codeLines;
+	}
+	
+	public int getModifiedLinesInTheLastMonths(String repo, int months) throws IOException{
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.MONDAY, (months*-1));
+		String beginingDateForSearch = convertDateToGithubFormat(calendar);
+		JsonArray weeksOfWork = github.getNumberOfLinesModificationsFromDate(repo, beginingDateForSearch, "master");
+		int weeksToCalculateModifications = months*4; // 4 weeks per month;
+		int modifiedLines = 0;
+		if (weeksToCalculateModifications > weeksOfWork.size()) {
+			for (JsonElement week : weeksOfWork) {
+				modifiedLines += Math.abs(week.getAsJsonArray().get(1).getAsInt());
+				modifiedLines += Math.abs(week.getAsJsonArray().get(2).getAsInt());
+			}
+		}else{
+			for (int i = 0; i < weeksToCalculateModifications; i++) {
+				JsonElement week = weeksOfWork.get(i);
+				modifiedLines += Math.abs(week.getAsJsonArray().get(1).getAsInt());
+				modifiedLines += Math.abs(week.getAsJsonArray().get(2).getAsInt());
+			}
+		}
+
+		return modifiedLines;
+	}
+	
+	public String convertDateToGithubFormat(Calendar calendar){
+		DateFormat dateFormatInIso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+		dateFormatInIso8601.setTimeZone(calendar.getTimeZone());
+		return  dateFormatInIso8601.format(calendar.getTime());
 	}
 
 }
