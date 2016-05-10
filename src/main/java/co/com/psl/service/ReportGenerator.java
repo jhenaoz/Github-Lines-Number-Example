@@ -41,14 +41,14 @@ public class ReportGenerator {
 		for (String repo : repos) {
 			requestGithubReport(repo);
 		}
-		//give some time for pending github reports.
-		pendingRequests.forEach((repo)-> requestGithubReport(repo));
-		exportReportAsCsv("Repositories Report");
+		// give some time for pending github reports.
+		pendingRequests.forEach((repo) -> requestGithubReport(repo));
+		cvsParser.generateCvsFile("Repositories Report", reposInformation);
 		System.out.println("End Report Procces");
 		System.exit(0);
 	}
 
-	public void requestGithubReport(String repo){
+	public void requestGithubReport(String repo) {
 		String repoName = getRepoNameFromCvsLine(repo);
 		try {
 			int numberOfLines = getLinesNumberByRepo(repoName);
@@ -65,23 +65,6 @@ public class ReportGenerator {
 	private int getFilesByRepository(String repositoryName) throws IOException, ReportNotReadyException {
 		JsonArray files = github.getNumberOfFilesByRepository(repositoryName);
 		return files.size();
-	}
-
-	private void exportReportAsCsv(String fileName) throws IOException {
-		FileWriter writer = new FileWriter(fileName + ".csv");
-		for (GithubRepository githubRepository : reposInformation) {
-			writer.append(githubRepository.getName());
-			writer.append(CSV_SEPARATOR);
-			writer.append(String.valueOf(githubRepository.getNumberOfLines()));
-			writer.append(CSV_SEPARATOR);
-			writer.append(String.valueOf(githubRepository.getNumberOfFiles()));
-			writer.append(CSV_SEPARATOR);
-			writer.append(String.valueOf(githubRepository.getNumberOfModifications()));
-			writer.append("\n");
-
-		}
-		writer.flush();
-		writer.close();
 	}
 
 	public String getRepoNameFromCvsLine(String cvsLine) {
@@ -121,7 +104,6 @@ public class ReportGenerator {
 				modifiedLines += Math.abs(week.getAsJsonArray().get(2).getAsInt());
 			}
 		}
-
 		return modifiedLines;
 	}
 
