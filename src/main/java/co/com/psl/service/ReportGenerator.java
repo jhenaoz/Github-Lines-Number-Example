@@ -1,6 +1,5 @@
 package co.com.psl.service;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
