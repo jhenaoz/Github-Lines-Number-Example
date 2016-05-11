@@ -34,6 +34,7 @@ public class CvsParser {
 	
 	public void generateCvsFile(String fileName, ArrayList<GithubRepository> reposInformation) throws IOException{
 		FileWriter writer = new FileWriter(fileName + ".csv");
+		writer.append(generateReportHeader());
 		for (GithubRepository githubRepository : reposInformation) {
 			writer.append(githubRepository.getName());
 			writer.append(CSV_SEPARATOR);
@@ -46,5 +47,9 @@ public class CvsParser {
 		}
 		writer.flush();
 		writer.close();
+	}
+	
+	public String generateReportHeader(){
+		return "Repo Name, Number of Lines, Number of Files, Year Modifications \n";
 	}
 }

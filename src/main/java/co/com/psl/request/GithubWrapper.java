@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.EnvironmentAware;
@@ -45,7 +47,7 @@ public class GithubWrapper implements EnvironmentAware {
 			.append(this.propertyResolver.getProperty("GITHUB_CLIENT_ID"))
 			.append("&")
 			.append(this.propertyResolver.getProperty("GITHUB_CLIENT_SECRET"));
-		String httpResponse = makeHttpRequest(getContributorsUrl.toString(), HttpMethod.GET);
+		String httpResponse = makeHttpRequest(getContributorsUrl.toString(), HttpMethod.GET, null);
 		return parser.parse(httpResponse).getAsJsonArray();
 	}
 	
@@ -55,7 +57,7 @@ public class GithubWrapper implements EnvironmentAware {
 			.append(repository)
 			.append("?access_token=")
 			.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
-		String httpResponse = makeHttpRequest(defaultBranchRequest.toString(), HttpMethod.GET);
+		String httpResponse = makeHttpRequest(defaultBranchRequest.toString(), HttpMethod.GET, null);
 		return parser.parse(httpResponse).getAsJsonObject().get("default_branch").getAsString();
 	}
 	
@@ -71,7 +73,7 @@ public class GithubWrapper implements EnvironmentAware {
 			.append(this.propertyResolver.getProperty("GITHUB_CLIENT_ID"))
 			.append("&")
 			.append(this.propertyResolver.getProperty("GITHUB_CLIENT_SECRET"));
-		String httpResponse = makeHttpRequest(getTreeFilesUrl.toString(), HttpMethod.GET);
+		String httpResponse = makeHttpRequest(getTreeFilesUrl.toString(), HttpMethod.GET, null);
 		return parser.parse(httpResponse).getAsJsonObject().get("tree").getAsJsonArray();
 	}
 	
@@ -80,13 +82,19 @@ public class GithubWrapper implements EnvironmentAware {
 			.append(GITHUB_API)
 			.append(repository)
 			.append(GITHUB_API_ADDITIONS_PER_WEEK);
-		String httpResponse = makeHttpRequest(commitsUrl.toString(), HttpMethod.GET);
+		String httpResponse = makeHttpRequest(commitsUrl.toString(), HttpMethod.GET, null);
 		return parser.parse(httpResponse).getAsJsonArray();	
 	}
 	
-	public String makeHttpRequest(String url, HttpMethod method) throws IOException, ReportNotReadyException{
+	public String makeHttpRequest(String url, HttpMethod method, HashMap<String, String> headers) throws IOException, ReportNotReadyException{
 		URL urlToRequest = new URL(url);
 		HttpURLConnection httpConnection = (HttpURLConnection) urlToRequest.openConnection();
+		StringBuilder credentials = new StringBuilder()
+			.append(this.propertyResolver.getProperty("GITHUB_USERNAME"))
+			.append(":")
+			.append(this.propertyResolver.getProperty("GITHUB_ACCESS_TOKEN"));
+		String basicAuth = "Basic " + new String(new Base64().encode(credentials.toString().getBytes()));
+		httpConnection.setRequestProperty("Authorization", basicAuth);
 		httpConnection.setRequestMethod(method.toString());
 		int statusCode = httpConnection.getResponseCode();
 		if (statusCode == 202) {
