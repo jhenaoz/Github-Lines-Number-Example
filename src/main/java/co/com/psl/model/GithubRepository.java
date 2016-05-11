@@ -3,24 +3,50 @@ package co.com.psl.model;
 public class GithubRepository {
 
 	private String name;
-	private int codeLines;
+	private int numberOfLines;
+	private int numberOfFiles;
+	private int numberOfModifications;
 	
 	public GithubRepository(){};
 	
-	public GithubRepository(String name, int lines) {
+	public GithubRepository(String name, int numberOfLines, int numberOfFiles, int numberOfModifications) {
 		this.name = name;
-		this.codeLines = lines;
+		this.numberOfLines = numberOfLines;
+		this.numberOfFiles = numberOfFiles;
+		this.numberOfModifications = numberOfModifications;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
-	public int getCodeLines() {
-		return codeLines;
+
+	public int getNumberOfLines() {
+		return numberOfLines;
 	}
-	public void setCodeLines(int codeLines) {
-		this.codeLines = codeLines;
+
+	public void setNumberOfLines(int numberOfLines) {
+		this.numberOfLines = numberOfLines;
 	}
+
+	public int getNumberOfFiles() {
+		return numberOfFiles;
+	}
+
+	public void setNumberOfFiles(int numberOfFiles) {
+		this.numberOfFiles = numberOfFiles;
+	}
+
+	public int getNumberOfModifications() {
+		return numberOfModifications;
+	}
+
+	public void setNumberOfModifications(int numberOfModifications) {
+		this.numberOfModifications = numberOfModifications;
+	}
+	
+
 }
